@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProctor AI - Student Examination Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/student.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .student-login-wrapper {
+      min-height: calc(100vh - 140px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px;
+    }
+
+    .student-login-card {
+      width: 100%;
+      max-width: 960px;
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      background: var(--bg-card);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .student-login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--text-primary);
+      z-index: 2;
+    }
+
+    @media (max-width: 860px) {
+      .student-login-card {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+      }
+    }
+
+    /* Left Sidebar */
+    .student-login-sidebar {
+      background: var(--bg-secondary);
+      padding: 44px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid var(--border-subtle);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .student-login-sidebar::after {
+      content: '';
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      bottom: -60px;
+      right: -60px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--grid-spotlight-1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .rule-callout-box {
+      margin: 20px 0;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-accent);
+    }
+
+    [data-theme="light"] .rule-callout-box {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .rule-code-badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+      letter-spacing: 1px;
+    }
+
+    /* Right Form */
+    .student-login-form {
+      padding: 44px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.86rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .roll-input-field {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--radius-sm);
+      background: var(--input-bg);
+      border: 2px solid var(--input-border);
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      box-sizing: border-box;
+      transition: all 0.25s ease;
+    }
+
+    .roll-input-field:focus {
+      outline: none;
+      border-color: var(--input-focus-border);
+      box-shadow: var(--input-focus-shadow);
+    }
+
+    .roll-input-field.valid {
+      border-color: var(--color-success);
+    }
+
+    .roll-input-field.invalid {
+      border-color: var(--color-danger);
+    }
+
+    .roll-validation-feedback {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .feedback-neutral {
+      color: var(--text-muted);
+    }
+    .feedback-valid {
+      color: var(--color-success);
+    }
+    .feedback-error {
+      color: var(--color-danger);
+    }
+
+    .demo-pill-container {
+      margin-top: 20px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .demo-pill-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .demo-pills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .demo-chip {
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.76rem;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    [data-theme="light"] .demo-chip {
+      background: rgba(0, 0, 0, 0.04);
+    }
+
+    .demo-chip:hover {
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+      border-color: var(--text-primary);
+    }
+
+    .demo-chip.chip-reject {
+      border-color: rgba(239, 68, 68, 0.4);
+      color: #f87171;
+    }
+    .demo-chip.chip-reject:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+
+    /* Alert Banner */
+    .login-alert-banner {
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 0.86rem;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      animation: slideDown 0.25s ease;
+    }
+
+    .login-alert-banner.error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    .shake-effect {
+      animation: shake 0.4s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-text">
+          <h1>SmartProctor AI</h1>
+          <span>Candidate Examination Workstation</span>
+        </div>
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <button class="theme-toggle-btn" title="Toggle Dark and Light Mode">
+          <span class="theme-icon">🌙</span> <span class="theme-label">Dark Mode</span>
+        </button>
+        <span class="badge badge-info">
+          <span class="pulse-dot"></span> CANDIDATE GATEWAY
+        </span>
+        <a href="index.html" class="nav-link">Exit to Hub</a>
+      </div>
+    </header>
+
+    <!-- Main Student Login Card -->
+    <main class="student-login-wrapper">
+      <div id="student-login-box" class="student-login-card">
+        
+        <!-- Left Column: Guidelines & Policy -->
+        <div class="student-login-sidebar">
+          <div>
+            <span class="badge badge-info" style="margin-bottom: 16px;">
+              AUTHENTICATED ACCESS ONLY
+            </span>
+
+            <h2 style="font-size: 1.8rem; font-weight: 800; line-height: 1.25; margin-bottom: 12px; color: var(--text-primary);">
+              Student Exam<br>
+              <span style="background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Login Portal</span>
+            </h2>
+
+            <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 18px;">
+              Enter your verified institution roll number to unlock your continuous AI-proctored examination workstation.
+            </p>
+
+            <!-- Prefix Rule Box -->
+            <div class="rule-callout-box">
+              <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                <span>🔒</span> Mandatory Credential Rule
+              </div>
+              <div style="font-size: 0.84rem; color: var(--text-secondary); line-height: 1.5;">
+                Authorized student roll numbers must strictly begin with the key prefix:
+                <div style="margin-top: 8px;">
+                  <span class="rule-code-badge">2422K</span>
+                  <span style="font-size: 0.78rem; color: var(--text-muted); margin-left: 6px;">(e.g., 2422K042, 2422K081)</span>
+                </div>
+              </div>
+            </div>
+
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 20px; font-size: 0.84rem; color: var(--text-secondary);">
+              <li style="display: flex; align-items: center; gap: 8px;">
+                <span>📹</span> Continuous Camera & Facial Tracking Active
+              </li>
+              <li style="display: flex; align-items: center; gap: 8px;">
+                <span>🎙️</span> <strong>Microphone Mandatory:</strong> Must remain ON to enter & take exam
+              </li>
+              <li style="display: flex; align-items: center; gap: 8px;">
+                <span>🔒</span> Single-Session Fullscreen Lockdown
+              </li>
+              <li style="display: flex; align-items: center; gap: 8px;">
+                <span>⚡</span> Zero manual admin wait &mdash; automated proctoring
+              </li>
+            </ul>
+          </div>
+
+          <div style="font-size: 0.74rem; color: var(--text-muted); margin-top: 24px;">
+            SmartProctor AI Examination Integrity Engine • Session ID verified
+          </div>
+        </div>
+
+        <!-- Right Column: Login Form -->
+        <div class="student-login-form">
+          <div style="margin-bottom: 24px;">
+            <h3 style="font-size: 1.45rem; font-weight: 800; color: var(--text-primary); margin-bottom: 6px;">
+              Examinee Authentication
+            </h3>
+            <p style="font-size: 0.88rem; color: var(--text-secondary);">
+              Please provide your student roll number to access your examination.
+            </p>
+          </div>
+
+          <!-- Alert Banner -->
+          <div id="login-alert" class="login-alert-banner"></div>
+
+          <form id="student-login-form" autocomplete="off">
+            <!-- Roll Number Input (Primary Credential) -->
+            <div class="form-group">
+              <label class="form-label" for="student-roll-input">
+                <span>Student Roll Number <strong style="color: var(--color-danger);">*</strong></span>
+                <span style="font-size: 0.76rem; color: var(--text-muted);">Must start with 2422K</span>
+              </label>
+              <input 
+                type="text" 
+                id="student-roll-input" 
+                class="roll-input-field" 
+                placeholder="2422K..." 
+                maxlength="20" 
+                required 
+                autofocus
+              >
+              <div id="roll-feedback" class="roll-validation-feedback feedback-neutral">
+                <span>ℹ️</span> <span>Enter roll number starting with 2422K</span>
+              </div>
+            </div>
+
+            <!-- Candidate Full Name (Optional / Auto-filled) -->
+            <div class="form-group">
+              <label class="form-label" for="student-name-input">
+                <span>Candidate Full Name</span>
+                <span style="font-size: 0.74rem; color: var(--text-muted);">(Optional - for exam paper)</span>
+              </label>
+              <input 
+                type="text" 
+                id="student-name-input" 
+                style="width: 100%; padding: 12px 14px; font-size: 0.95rem;" 
+                placeholder="e.g. Naveen Kumar"
+              >
+            </div>
+
+            <!-- Target Examination Selection -->
+            <div class="form-group">
+              <label class="form-label" for="student-exam-select">
+                <span>Select Examination</span>
+              </label>
+              <select id="student-exam-select" style="width: 100%; padding: 12px 14px; font-size: 0.92rem; cursor: pointer;">
+                <option value="exam-cs402">CS-402: Artificial Intelligence & Autonomous Systems Final Exam</option>
+              </select>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="btn-login-student" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 1rem; margin-top: 10px;">
+              Verify Roll Number & Proceed to Exam →
+            </button>
+          </form>
+
+          <!-- Quick Fill Demo Chips -->
+          <div class="demo-pill-container">
+            <div class="demo-pill-title">Quick Demo Test Credentials:</div>
+            <div class="demo-pills-row">
+              <button type="button" class="demo-chip" data-roll="2422K042" data-name="Naveen Kumar" title="Valid 2422K Roll Number">
+                <span>✓</span> 2422K042 (Naveen)
+              </button>
+              <button type="button" class="demo-chip" data-roll="2422K081" data-name="Aditya Sharma" title="Valid 2422K Roll Number">
+                <span>✓</span> 2422K081 (Aditya)
+              </button>
+              <button type="button" class="demo-chip" data-roll="2422K114" data-name="Priya Patel" title="Valid 2422K Roll Number">
+                <span>✓</span> 2422K114 (Priya)
+              </button>
+              <button type="button" class="demo-chip chip-reject" data-roll="CS2026-999" data-name="Invalid Candidate" title="Invalid prefix test (will be rejected)">
+                <span>✕</span> CS2026-999 (Test Reject)
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Student Authentication & Roll Number 2422K Validation Logic
+    (function () {
+      const rollInput = document.getElementById('student-roll-input');
+      const nameInput = document.getElementById('student-name-input');
+      const examSelect = document.getElementById('student-exam-select');
+      const feedback = document.getElementById('roll-feedback');
+      const alertBox = document.getElementById('login-alert');
+      const loginCard = document.getElementById('student-login-box');
+      const loginForm = document.getElementById('student-login-form');
+      const submitBtn = document.getElementById('btn-login-student');
+
+      // Fetch exams list
+      async function loadExams() {
+        try {
+          const res = await fetch('/api/exams');
+          const data = await res.json();
+          if (data && data.exams && data.exams.length > 0) {
+            examSelect.innerHTML = data.exams.map(e => 
+              `<option value="${e.id}">${e.examCode || ''} • ${e.title} (${e.institutionName || ''})</option>`
+            ).join('');
+          }
+        } catch (e) {
+          console.warn('Could not load exams dynamically:', e);
+        }
+      }
+      loadExams();
+
+      // Check pre-existing session
+      const existingRoll = localStorage.getItem('smartproctor_student_roll');
+      const existingName = localStorage.getItem('smartproctor_student_name');
+      if (existingRoll && existingRoll.toLowerCase().startsWith('2422k')) {
+        rollInput.value = existingRoll;
+        if (existingName) nameInput.value = existingName;
+        validateRollFormat(existingRoll);
+      }
+
+      function validateRollFormat(value) {
+        const trimmed = value.trim();
+        if (!trimmed) {
+          rollInput.classList.remove('valid', 'invalid');
+          feedback.className = 'roll-validation-feedback feedback-neutral';
+          feedback.innerHTML = '<span>ℹ️</span> <span>Enter roll number starting with 2422K</span>';
+          return null;
+        }
+
+        if (trimmed.toLowerCase().startsWith('2422k')) {
+          rollInput.classList.add('valid');
+          rollInput.classList.remove('invalid');
+          feedback.className = 'roll-validation-feedback feedback-valid';
+          feedback.innerHTML = '<span>✓</span> <span>Authorized Roll Number prefix verified (2422K)</span>';
+          return true;
+        } else {
+          rollInput.classList.add('invalid');
+          rollInput.classList.remove('valid');
+          feedback.className = 'roll-validation-feedback feedback-error';
+          feedback.innerHTML = '<span>✕</span> <span>Only roll numbers starting with "2422K" are accepted</span>';
+          return false;
+        }
+      }
+
+      // Live validation on keystroke
+      rollInput.addEventListener('input', (e) => {
+        validateRollFormat(e.target.value);
+        hideAlert();
+      });
+
+      function showAlert(msg) {
+        alertBox.textContent = msg;
+        alertBox.className = 'login-alert-banner error';
+        alertBox.style.display = 'flex';
+        loginCard.classList.remove('shake-effect');
+        void loginCard.offsetWidth; // trigger reflow
+        loginCard.classList.add('shake-effect');
+      }
+
+      function hideAlert() {
+        alertBox.style.display = 'none';
+      }
+
+      // Quick-fill chips
+      document.querySelectorAll('.demo-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const roll = chip.getAttribute('data-roll');
+          const name = chip.getAttribute('data-name');
+          rollInput.value = roll;
+          if (name) nameInput.value = name;
+          validateRollFormat(roll);
+          hideAlert();
+        });
+      });
+
+      // Submit Handler
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const roll = rollInput.value.trim();
+        const name = nameInput.value.trim() || ('Candidate ' + roll.toUpperCase());
+        const examId = examSelect.value;
+
+        // STRICT CHECK: must start with 2422k
+        if (!roll.toLowerCase().startsWith('2422k')) {
+          showAlert("Access Denied: Only Student Roll Numbers starting with '2422K' are accepted (e.g., 2422K042).");
+          rollInput.focus();
+          return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying Credential...';
+
+        try {
+          const res = await fetch('/api/student/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              rollNumber: roll,
+              name,
+              examId
+            })
+          });
+
+          const data = await res.json();
+          if (data && data.success) {
+            // Save student credentials in localStorage
+            localStorage.setItem('smartproctor_student_roll', roll.toUpperCase());
+            localStorage.setItem('smartproctor_student_name', name);
+            localStorage.setItem('smartproctor_student_exam_id', examId);
+            localStorage.setItem('smartproctor_student_token', data.token);
+
+            submitBtn.textContent = 'Access Granted! Entering Room...';
+            setTimeout(() => {
+              window.location.href = `student.html?examId=${encodeURIComponent(examId)}`;
+            }, 500);
+          } else {
+            showAlert(data.error || "Authentication Failed. Only roll numbers starting with '2422K' are permitted.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify Roll Number & Proceed to Exam →';
+          }
+        } catch (err) {
+          // If offline/local fallback, still strictly enforce 2422k
+          if (roll.toLowerCase().startsWith('2422k')) {
+            localStorage.setItem('smartproctor_student_roll', roll.toUpperCase());
+            localStorage.setItem('smartproctor_student_name', name);
+            localStorage.setItem('smartproctor_student_exam_id', examId);
+            window.location.href = `student.html?examId=${encodeURIComponent(examId)}`;
+          } else {
+            showAlert("Access Denied: Candidate Roll Number must begin with '2422K'.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Verify Roll Number & Proceed to Exam →';
+          }
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

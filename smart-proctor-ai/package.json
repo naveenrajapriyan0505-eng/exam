@@ -1,0 +1,21 @@
+{
+  "name": "smart-proctor-ai",
+  "version": "1.0.0",
+  "description": "AI-Based Exam Proctoring & Management System with Face/Head Pose Tracking, Unauthorized Object Detection, and Process Monitoring",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "monitor": "node process-monitor.js"
+  },
+  "keywords": [
+    "ai",
+    "proctoring",
+    "exam-management",
+    "computer-vision",
+    "face-detection",
+    "object-detection",
+    "process-monitoring"
+  ],
+  "author": "SmartProctor AI Team",
+  "license": "MIT"
+}

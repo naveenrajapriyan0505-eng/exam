@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProctor AI - Administrator & Proctor Secure Login</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin-login.css">
+  <script src="js/theme.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-text">
+          <h1>SmartProctor AI</h1>
+          <span>Proctor Authentication & Command Gateway</span>
+        </div>
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <button class="theme-toggle-btn" title="Toggle Black & White Theme">
+          <span class="theme-icon">🌓</span> <span class="theme-label">Black Theme</span>
+        </button>
+        <span class="badge badge-warning">
+          <span class="pulse-dot"></span> RESTRICTED PORTAL
+        </span>
+        <a href="index.html" class="btn btn-outline btn-sm">
+          ← Return to Hub
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Login Console -->
+    <main class="login-page-wrapper">
+      <div id="login-card" class="login-container">
+        
+        <!-- Left Column: Security Context & Authority Overview -->
+        <div class="login-sidebar">
+          <div>
+            <div class="security-badge">
+              <span>🔒</span> LEVEL-3 PROCTOR PRIVILEGES
+            </div>
+            
+            <h1 class="sidebar-title">
+              Invigilation &<br>
+              <span>Command Center</span>
+            </h1>
+
+            <p class="sidebar-desc">
+              Restricted examination control terminal. Authenticated proctors can monitor active student telemetry, 
+              receive instant AI violation alerts, inspect evidence snapshots, and enforce remote disciplinary sanctions.
+            </p>
+
+            <ul class="security-checklist">
+              <li>
+                <span class="check-icon">✓</span>
+                <div>
+                  <strong style="color: #fff;">Real-Time Fleet Telemetry:</strong> Live multi-stream examinee monitoring.
+                </div>
+              </li>
+              <li>
+                <span class="check-icon">✓</span>
+                <div>
+                  <strong style="color: #fff;">Autonomous Infraction Feeds:</strong> Continuous head pose, gaze & object alerts.
+                </div>
+              </li>
+              <li>
+                <span class="check-icon">✓</span>
+                <div>
+                  <strong style="color: #fff;">Remote Intervention Console:</strong> Issue instant warnings or terminate sessions.
+                </div>
+              </li>
+              <li>
+                <span class="check-icon">✓</span>
+                <div>
+                  <strong style="color: #fff;">Forensic Evidence Logs:</strong> Certified timestamps & webcam photographic records.
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Default Controller Profile Notice -->
+          <div class="officer-badge">
+            <div class="officer-avatar">👨‍🏫</div>
+            <div class="officer-info">
+              <div class="officer-name">Prof. S. R. Sharma</div>
+              <div class="officer-role">Chief Examination Controller • Dept. of CSE</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Login Form -->
+        <div class="login-form-panel">
+          
+          <div class="form-header">
+            <h2>Proctor Sign In</h2>
+            <p>Enter your administrator credentials or rapid emergency passkey.</p>
+          </div>
+
+          <!-- Alert Notification Banner -->
+          <div id="login-alert" class="alert-banner">
+            <span id="alert-icon">⚠️</span>
+            <span id="alert-text">Alert message goes here</span>
+          </div>
+
+          <!-- Demo Credential Autofill Helper -->
+          <div class="demo-credentials-box">
+            <div class="demo-title">
+              <span>⚡ Fast Demo Access</span>
+              <span style="font-size: 0.7rem; color: var(--text-muted);">Click to auto-fill</span>
+            </div>
+            <div class="demo-pills">
+              <button type="button" id="btn-demo-creds" class="demo-pill" title="Fill default username and password">
+                <span>🔑</span> Default Admin: <code>admin</code> / <code>proctor@2026</code>
+              </button>
+              <button type="button" id="btn-demo-pin" class="demo-pill" title="Fill 4-digit emergency passkey">
+                <span>⚡</span> Emergency PIN: <code>9921</code>
+              </button>
+            </div>
+          </div>
+
+          <!-- Authentication Mode Tabs -->
+          <div class="auth-tabs">
+            <button type="button" id="tab-btn-pwd" class="auth-tab-btn active">
+              <span>🔐</span> Password Auth
+            </button>
+            <button type="button" id="tab-btn-pin" class="auth-tab-btn">
+              <span>🔢</span> 4-Digit Passkey
+            </button>
+          </div>
+
+          <form id="admin-login-form" autocomplete="off">
+            <!-- Mode 1: Standard Username + Password -->
+            <div id="view-mode-pwd">
+              <div class="form-group">
+                <label class="form-label" for="admin-username">Administrator ID / Username</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">👤</span>
+                  <input 
+                    type="text" 
+                    id="admin-username" 
+                    class="form-input" 
+                    placeholder="e.g. admin" 
+                    required 
+                    autocomplete="username"
+                    value="admin"
+                  >
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="form-label">
+                  <label for="admin-password">Secure Password</label>
+                  <span style="font-size: 0.75rem; color: var(--text-muted);">Case-sensitive</span>
+                </div>
+                <div class="input-wrapper">
+                  <span class="input-icon">🔒</span>
+                  <input 
+                    type="password" 
+                    id="admin-password" 
+                    class="form-input" 
+                    placeholder="Enter proctor password" 
+                    required
+                    autocomplete="current-password"
+                  >
+                  <button type="button" id="btn-toggle-pwd" class="toggle-pwd-btn" title="Toggle password visibility">
+                    👁️
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mode 2: Quick Emergency 4-Digit Passkey -->
+            <div id="view-mode-pin" style="display: none;">
+              <div class="form-group">
+                <div class="form-label">
+                  <label for="admin-passkey">Emergency Controller Passkey</label>
+                  <span style="font-size: 0.75rem; color: var(--cyan-glow);">Default: 9921</span>
+                </div>
+                <div class="input-wrapper">
+                  <span class="input-icon">🔑</span>
+                  <input 
+                    type="password" 
+                    id="admin-passkey" 
+                    class="form-input" 
+                    placeholder="Enter 4-digit PIN" 
+                    maxlength="8" 
+                    style="letter-spacing: 4px; font-size: 1.15rem; font-family: var(--font-mono);"
+                  >
+                </div>
+                <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 6px;">
+                  Used for rapid on-site proctor terminal unlocking during active sessions.
+                </div>
+              </div>
+            </div>
+
+            <!-- Session Options -->
+            <div class="options-row">
+              <label class="checkbox-label">
+                <input type="checkbox" id="remember-me" checked>
+                <span>Remember session for 12 hours</span>
+              </label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="btn-submit" class="btn-login">
+              <span id="btn-spinner" style="display: none;">⏳</span>
+              <span id="btn-text">Authenticate & Unlock Command Center →</span>
+            </button>
+          </form>
+
+          <div class="login-legal">
+            🛡️ Protected by SmartProctor AI Security Mesh. All access timestamps, 
+            IP addresses, and candidate disciplinary interventions are encrypted and auditable.
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      const STORAGE_KEY = 'smartproctor_admin_token';
+      const USER_KEY = 'smartproctor_admin_user';
+
+      const loginCard = document.getElementById('login-card');
+      const form = document.getElementById('admin-login-form');
+      const inputUsername = document.getElementById('admin-username');
+      const inputPassword = document.getElementById('admin-password');
+      const inputPasskey = document.getElementById('admin-passkey');
+      const btnTogglePwd = document.getElementById('btn-toggle-pwd');
+      const btnSubmit = document.getElementById('btn-submit');
+      const btnText = document.getElementById('btn-text');
+      const btnSpinner = document.getElementById('btn-spinner');
+      const rememberCheckbox = document.getElementById('remember-me');
+
+      const tabBtnPwd = document.getElementById('tab-btn-pwd');
+      const tabBtnPin = document.getElementById('tab-btn-pin');
+      const viewModePwd = document.getElementById('view-mode-pwd');
+      const viewModePin = document.getElementById('view-mode-pin');
+
+      const btnDemoCreds = document.getElementById('btn-demo-creds');
+      const btnDemoPin = document.getElementById('btn-demo-pin');
+
+      const alertBanner = document.getElementById('login-alert');
+      const alertIcon = document.getElementById('alert-icon');
+      const alertText = document.getElementById('alert-text');
+
+      let currentMode = 'pwd'; // 'pwd' or 'pin'
+
+      // Check query parameters (e.g., redirected from admin.html or logged out)
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirectUrl = urlParams.get('redirect') || 'admin.html';
+
+      if (urlParams.get('loggedout') === '1') {
+        showAlert('info', 'ℹ️', 'Terminal successfully locked. Your proctor session has ended.');
+      } else if (urlParams.get('expired') === '1') {
+        showAlert('error', '⚠️', 'Proctor session expired or invalid. Please sign in again.');
+      }
+
+      // Check if already authenticated
+      checkExistingSession();
+
+      async function checkExistingSession() {
+        const token = localStorage.getItem(STORAGE_KEY) || sessionStorage.getItem(STORAGE_KEY);
+        if (!token) return;
+
+        try {
+          const res = await fetch('/api/admin/verify', {
+            headers: { 'Authorization': 'Bearer ' + token }
+          });
+          const data = await res.json();
+          if (data.success && data.valid) {
+            showAlert('success', '✓', `Active session verified for ${data.user.name}. Opening Command Center...`);
+            setTimeout(() => {
+              window.location.replace(redirectUrl);
+            }, 600);
+          } else {
+            localStorage.removeItem(STORAGE_KEY);
+            sessionStorage.removeItem(STORAGE_KEY);
+          }
+        } catch (e) {
+          // Offline or network issue, allow manual sign in
+        }
+      }
+
+      // Tab Switching
+      tabBtnPwd.addEventListener('click', () => switchMode('pwd'));
+      tabBtnPin.addEventListener('click', () => switchMode('pin'));
+
+      function switchMode(mode) {
+        currentMode = mode;
+        if (mode === 'pwd') {
+          tabBtnPwd.classList.add('active');
+          tabBtnPin.classList.remove('active');
+          viewModePwd.style.display = 'block';
+          viewModePin.style.display = 'none';
+          inputUsername.setAttribute('required', 'required');
+          inputPassword.setAttribute('required', 'required');
+          inputPasskey.removeAttribute('required');
+          inputPassword.focus();
+        } else {
+          tabBtnPin.classList.add('active');
+          tabBtnPwd.classList.remove('active');
+          viewModePin.style.display = 'block';
+          viewModePwd.style.display = 'none';
+          inputUsername.removeAttribute('required');
+          inputPassword.removeAttribute('required');
+          inputPasskey.setAttribute('required', 'required');
+          inputPasskey.focus();
+        }
+      }
+
+      // Password Visibility Toggle
+      btnTogglePwd.addEventListener('click', () => {
+        const isPwd = inputPassword.type === 'password';
+        inputPassword.type = isPwd ? 'text' : 'password';
+        btnTogglePwd.textContent = isPwd ? '🙈' : '👁️';
+      });
+
+      // Quick Demo Autofills
+      btnDemoCreds.addEventListener('click', () => {
+        switchMode('pwd');
+        inputUsername.value = 'admin';
+        inputPassword.value = 'proctor@2026';
+        showAlert('info', '⚡', 'Default administrator credentials loaded: admin / proctor@2026');
+        inputPassword.focus();
+      });
+
+      btnDemoPin.addEventListener('click', () => {
+        switchMode('pin');
+        inputPasskey.value = '9921';
+        showAlert('info', '⚡', 'Emergency Passkey PIN loaded: 9921');
+        inputPasskey.focus();
+      });
+
+      // Form Submission
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const payload = {};
+        if (currentMode === 'pwd') {
+          payload.username = inputUsername.value.trim();
+          payload.password = inputPassword.value;
+          if (!payload.username || !payload.password) {
+            showAlert('error', '⚠️', 'Please enter both username and password.');
+            return;
+          }
+        } else {
+          payload.passkey = inputPasskey.value.trim();
+          if (!payload.passkey) {
+            showAlert('error', '⚠️', 'Please enter your 4-digit passkey.');
+            return;
+          }
+        }
+
+        // Set Loading State
+        btnSubmit.disabled = true;
+        btnSpinner.style.display = 'inline-block';
+        btnText.textContent = 'Verifying Security Clearance...';
+
+        try {
+          const res = await fetch('/api/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+
+          if (res.ok && data.success && data.token) {
+            // Save Token
+            const storage = rememberCheckbox.checked ? localStorage : sessionStorage;
+            storage.setItem(STORAGE_KEY, data.token);
+            storage.setItem(USER_KEY, JSON.stringify(data.user || {}));
+
+            showAlert('success', '✓', `Access Granted: Welcome, ${data.user.name} (${data.user.role}). Redirecting...`);
+            btnText.textContent = 'Access Authorized! Redirecting...';
+
+            setTimeout(() => {
+              window.location.replace(redirectUrl);
+            }, 600);
+          } else {
+            triggerShake();
+            showAlert('error', '⛔', data.error || 'Access Denied: Invalid administrator credentials or passkey.');
+            btnSubmit.disabled = false;
+            btnSpinner.style.display = 'none';
+            btnText.textContent = 'Authenticate & Unlock Command Center →';
+            if (currentMode === 'pwd') {
+              inputPassword.focus();
+              inputPassword.select();
+            } else {
+              inputPasskey.focus();
+              inputPasskey.select();
+            }
+          }
+        } catch (err) {
+          triggerShake();
+          showAlert('error', '⚠️', 'Connection error: Unable to contact authentication server.');
+          btnSubmit.disabled = false;
+          btnSpinner.style.display = 'none';
+          btnText.textContent = 'Authenticate & Unlock Command Center →';
+        }
+      });
+
+      function showAlert(type, icon, text) {
+        alertBanner.className = 'alert-banner ' + type;
+        alertIcon.textContent = icon;
+        alertText.textContent = text;
+        alertBanner.style.display = 'flex';
+      }
+
+      function hideAlert() {
+        alertBanner.style.display = 'none';
+      }
+
+      function triggerShake() {
+        loginCard.classList.remove('shake');
+        void loginCard.offsetWidth; // Force DOM reflow
+        loginCard.classList.add('shake');
+      }
+    })();
+  </script>
+</body>
+</html>

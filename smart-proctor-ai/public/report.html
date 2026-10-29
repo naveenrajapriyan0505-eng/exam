@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProctor AI - Official Examination Integrity Audit Report</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .report-paper {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 48px;
+      margin: 30px auto;
+      max-width: 960px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      position: relative;
+    }
+    
+    .report-header-banner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--border-accent);
+      padding-bottom: 24px;
+      margin-bottom: 32px;
+    }
+
+    .report-crest {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .crest-symbol {
+      width: 56px;
+      height: 56px;
+      background: var(--btn-primary-bg);
+      color: var(--btn-primary-color);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .meta-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .meta-table td {
+      padding: 10px 14px;
+      border: 1px solid var(--border-subtle);
+      font-size: 0.9rem;
+    }
+    .meta-table td.label {
+      color: var(--text-muted);
+      width: 25%;
+      background: rgba(255,255,255,0.02);
+      font-weight: 600;
+    }
+    .meta-table td.value {
+      color: #fff;
+      font-weight: 500;
+    }
+
+    .score-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 24px 0 32px;
+    }
+    .score-summary-box {
+      padding: 20px;
+      border-radius: var(--radius-md);
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-subtle);
+      text-align: center;
+    }
+
+    .evidence-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+    }
+    .evidence-table th {
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-primary);
+      text-align: left;
+    }
+    [data-theme="light"] .evidence-table th {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .evidence-table td {
+      padding: 12px;
+      border: 1px solid var(--border-subtle);
+      font-size: 0.85rem;
+    }
+
+    .signoff-section {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 30px;
+      margin-top: 60px;
+      padding-top: 30px;
+      border-top: 1px dashed var(--border-subtle);
+      text-align: center;
+    }
+    .signoff-line {
+      border-top: 1px solid var(--text-muted);
+      margin-top: 40px;
+      padding-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .navbar, .btn-print-controls {
+        display: none !important;
+      }
+      .report-paper {
+        background: #fff !important;
+        color: #000 !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+      }
+      .meta-table td, .evidence-table td, .evidence-table th {
+        border-color: #ddd !important;
+        color: #000 !important;
+      }
+      .meta-table td.label {
+        background: #f5f5f5 !important;
+        color: #333 !important;
+      }
+      .score-summary-box {
+        background: #f9f9f9 !important;
+        border-color: #ccc !important;
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="navbar">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-text">
+          <h1>SmartProctor AI</h1>
+          <span>Official Academic Integrity Registry</span>
+        </div>
+      </a>
+      <div class="btn-print-controls" style="display: flex; align-items: center; gap: 12px;">
+        <button class="theme-toggle-btn" title="Toggle Black & White Theme">
+          <span class="theme-icon">🌓</span> <span class="theme-label">Black Theme</span>
+        </button>
+        <button onclick="window.print()" class="btn btn-primary btn-sm">🖨️ Print / Save PDF</button>
+        <a href="admin.html" class="btn btn-outline btn-sm">← Back to Command Center</a>
+      </div>
+    </header>
+
+    <div class="report-paper">
+      <!-- Banner -->
+      <div class="report-header-banner">
+        <div class="report-crest">
+          <div class="crest-symbol">🎓</div>
+          <div>
+            <h2 style="font-size: 1.4rem; letter-spacing: -0.5px;">DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING</h2>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">Autonomous Academic Examination & AI Integrity Board</div>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <span class="badge badge-info" style="font-size: 0.75rem;">OFFICIAL AUDIT REPORT</span>
+          <div id="report-date" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 6px;">Date: Oct 2026</div>
+        </div>
+      </div>
+
+      <h3 style="font-size: 1.25rem; margin-bottom: 8px;">Candidate Examination & Biometric Telemetry Record</h3>
+      <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 20px;">
+        This document represents the certified forensic audit of candidate conduct generated automatically by the 
+        SmartProctor AI invigilation engine, evaluating computer vision feeds, head pose orientation, object detections, and background OS processes.
+      </p>
+
+      <!-- Candidate Metadata Table -->
+      <table class="meta-table">
+        <tr>
+          <td class="label">Candidate Name</td>
+          <td id="rep-name" class="value">Naveen Kumar</td>
+          <td class="label">Roll / Reg Number</td>
+          <td id="rep-roll" class="value">CS2026-042</td>
+        </tr>
+        <tr>
+          <td class="label">Subject Code & Name</td>
+          <td id="rep-subject" class="value">CS-402: Artificial Intelligence & Autonomous Systems</td>
+          <td class="label">Session ID</td>
+          <td id="rep-session-id" class="value" style="font-family: var(--font-mono); font-size: 0.8rem;">sess-stu-101</td>
+        </tr>
+        <tr>
+          <td class="label">Biometric Verification</td>
+          <td class="value"><span class="badge badge-success">✓ Facial Geometry Verified</span></td>
+          <td class="label">Hardware Sensor Check</td>
+          <td class="value">Webcam 30 FPS • Mic Active • Fullscreen Enforced</td>
+        </tr>
+      </table>
+
+      <!-- Executive Scorecard -->
+      <div class="score-summary-grid">
+        <div class="score-summary-box">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Academic Score</div>
+          <div id="rep-score" style="font-size: 1.8rem; font-weight: 700; color: var(--cyan-glow); margin: 6px 0;">42 / 50</div>
+          <div style="font-size: 0.75rem; color: #34d399;">Grade: A (Distinction)</div>
+        </div>
+
+        <div class="score-summary-box">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Integrity Trust Score</div>
+          <div id="rep-trust" style="font-size: 1.8rem; font-weight: 700; color: #34d399; margin: 6px 0;">78%</div>
+          <div id="rep-trust-label" style="font-size: 0.75rem; color: var(--text-muted);">Moderate Infraction Deductions</div>
+        </div>
+
+        <div class="score-summary-box">
+          <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Invigilation Verdict</div>
+          <div id="rep-verdict" style="font-size: 1.3rem; font-weight: 700; color: #fbbf24; margin: 8px 0;">VALIDATED</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Approved with Proctor Review</div>
+        </div>
+      </div>
+
+      <!-- Infraction Timeline Table -->
+      <h3 style="font-size: 1.15rem; margin-bottom: 12px;">Chronological Security Infraction Log</h3>
+      <table class="evidence-table">
+        <thead>
+          <tr>
+            <th style="width: 15%;">Time</th>
+            <th style="width: 25%;">Infraction Category</th>
+            <th style="width: 15%;">Severity</th>
+            <th>Description & Telemetry Evidence</th>
+          </tr>
+        </thead>
+        <tbody id="rep-violations-tbody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+
+      <!-- Invigilation Sign-off Section -->
+      <div class="signoff-section">
+        <div>
+          <div class="signoff-line">
+            <strong>Prof. AI Proctoring Invigilator</strong><br>
+            Automated Biometric System
+          </div>
+        </div>
+        <div>
+          <div class="signoff-line">
+            <strong>Head of Department</strong><br>
+            Computer Science & Engineering
+          </div>
+        </div>
+        <div>
+          <div class="signoff-line">
+            <strong>Controller of Examinations</strong><br>
+            University Academic Board
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('report-date').textContent = 'Date: ' + new Date().toLocaleDateString();
+
+      const params = new URLSearchParams(window.location.search);
+      const sessionId = params.get('sessionId') || 'sess-stu-101';
+
+      try {
+        const res = await fetch('/api/sessions');
+        const data = await res.json();
+        const session = (data.sessions || []).find(s => s.id === sessionId) || data.sessions[0];
+
+        if (session) {
+          document.getElementById('rep-name').textContent = session.candidateName || 'Naveen Kumar';
+          document.getElementById('rep-roll').textContent = session.candidateRoll || 'CS2026-042';
+          document.getElementById('rep-session-id').textContent = session.id;
+
+          if (session.examId) {
+            fetch(`/api/exam/${session.examId}`).then(r => r.json()).then(ed => {
+              if (ed && ed.exam) {
+                const subjElem = document.getElementById('rep-subject');
+                if (subjElem) {
+                  subjElem.textContent = `${ed.exam.examCode || 'EXAM'}: ${ed.exam.title} (${ed.exam.institutionName})`;
+                }
+                const crestH2 = document.querySelector('.report-crest h2');
+                if (crestH2 && ed.exam.institutionName) {
+                  crestH2.textContent = `${ed.exam.institutionName.toUpperCase()} • ${ed.exam.department ? ed.exam.department.toUpperCase() : ''}`;
+                }
+              }
+            }).catch(console.error);
+          }
+
+          const trust = session.trustScore !== undefined ? session.trustScore : 85;
+          document.getElementById('rep-trust').textContent = trust + '%';
+
+          const score = session.finalScore !== undefined ? `${session.finalScore} / ${session.totalMarks || 50}` : '40 / 50';
+          document.getElementById('rep-score').textContent = score;
+
+          const verdictElem = document.getElementById('rep-verdict');
+          const trustLabelElem = document.getElementById('rep-trust-label');
+          if (session.status === 'terminated' || trust <= 50) {
+            verdictElem.textContent = 'DISQUALIFIED / TERMINATED';
+            verdictElem.style.color = '#f87171';
+            if (trustLabelElem) {
+              trustLabelElem.textContent = 'Breached <= 50% Threshold (Automatic Disqualification)';
+              trustLabelElem.style.color = '#f87171';
+            }
+          } else if (trust > 75) {
+            verdictElem.textContent = 'VALIDATED (CLEAN)';
+            verdictElem.style.color = '#34d399';
+          } else {
+            verdictElem.textContent = 'PROVISIONALLY VALIDATED';
+            verdictElem.style.color = '#fbbf24';
+          }
+
+          // Populate violations
+          const sessionViolations = (data.violations || []).filter(v => v.sessionId === session.id);
+          const tbody = document.getElementById('rep-violations-tbody');
+          tbody.innerHTML = '';
+
+          if (sessionViolations.length === 0) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                  ✓ Zero security violations detected. Exemplary candidate examination conduct.
+                </td>
+              </tr>
+            `;
+          } else {
+            sessionViolations.forEach(v => {
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td style="font-family: var(--font-mono);">${v.timestamp || 'N/A'}</td>
+                <td><strong>${v.type.replace(/_/g, ' ')}</strong></td>
+                <td>
+                  <span class="badge ${v.severity === 'CRITICAL' ? 'badge-danger' : (v.severity === 'HIGH' ? 'badge-warning' : 'badge-info')}" style="font-size: 0.68rem;">
+                    ${v.severity}
+                  </span>
+                </td>
+                <td>${v.details}</td>
+              `;
+              tbody.appendChild(tr);
+            });
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>

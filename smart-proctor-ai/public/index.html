@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProctor AI - Autonomous Exam Management & Proctoring System</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .hero-section {
+      text-align: center;
+      padding: 60px 20px 40px;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-accent);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+    [data-theme="light"] .hero-badge {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .hero-title {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 20px;
+      letter-spacing: -1px;
+      color: var(--text-primary);
+    }
+    .hero-title span {
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 760px;
+      margin: 0 auto 40px;
+    }
+    
+    /* Portals Grid */
+    .portals-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 28px;
+      margin-bottom: 60px;
+    }
+    .portal-card {
+      padding: 36px 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: var(--radius-lg);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+    }
+    .portal-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--text-primary);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .portal-card:hover::after {
+      opacity: 1;
+    }
+    .portal-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin-bottom: 22px;
+    }
+    [data-theme="light"] .portal-icon {
+      background: rgba(0, 0, 0, 0.04);
+    }
+    .portal-card h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    .portal-card p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      margin-bottom: 26px;
+      flex-grow: 1;
+    }
+    .portal-features {
+      list-style: none;
+      margin-bottom: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .portal-features li {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .portal-features li span.icon {
+      color: var(--text-primary);
+      font-weight: 800;
+    }
+
+    /* Core Features Matrix */
+    .features-section {
+      margin-bottom: 60px;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .section-header h2 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+    .feature-pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+    @media (max-width: 900px) {
+      .feature-pillars {
+        grid-template-columns: 1fr;
+      }
+      .hero-title {
+        font-size: 2.4rem;
+      }
+    }
+    .pillar-card {
+      padding: 28px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+    }
+    .pillar-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 16px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+    }
+    .pillar-card p {
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    
+    /* Live Companion Process banner */
+    .companion-banner {
+      padding: 30px;
+      margin-bottom: 60px;
+      border: 1px solid var(--border-accent);
+      background: var(--bg-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .companion-info h3 {
+      font-size: 1.35rem;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+    .companion-info p {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      max-width: 700px;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-text">
+          <h1>SmartProctor AI</h1>
+          <span>Autonomous Exam Management & Integrity System</span>
+        </div>
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <nav class="nav-links">
+          <a href="index.html" class="nav-link active">Home</a>
+          <a href="student-login.html" class="nav-link">Student Login</a>
+          <a href="admin-login.html" class="nav-link">Admin / Proctor Login</a>
+          <a href="report.html" class="nav-link">Audit Reports</a>
+        </nav>
+        <button class="theme-toggle-btn" title="Toggle Black & White Theme">
+          <span class="theme-icon">🌓</span> <span class="theme-label">Black Theme</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        <span class="pulse-dot"></span>
+        FINAL YEAR PROJECT 2026 • AI-POWERED EXAM SUPERVISION
+      </div>
+      <h1 class="hero-title">
+        Next-Generation Autonomous<br>
+        <span>AI-Based Exam Proctoring System</span>
+      </h1>
+      <p class="hero-desc">
+        Comprehensive academic examination platform with real-time continuous head pose & gaze tracking, 
+        computer vision unauthorized object detection, and background application process monitoring.
+      </p>
+    </section>
+
+    <!-- Main Portals Grid -->
+    <section class="portals-grid">
+      <!-- Student Portal -->
+      <div class="glass-panel portal-card card-student">
+        <div>
+          <div class="portal-icon">👨‍🎓</div>
+          <h2>Student Exam Portal</h2>
+          <p>
+            Secure, full-screen examination environment with pre-test hardware verification, question palette, 
+            interactive code and theory assessment, and real-time AI supervision feedback.
+          </p>
+          <ul class="portal-features">
+            <li><span class="icon">✓</span> Continuous Head Pose & Looking-Away Tracking</li>
+            <li><span class="icon">✓</span> Real-Time Mobile Phone & Object Detection</li>
+            <li><span class="icon">✓</span> Tab Switch & Full-Screen Lockdown Security</li>
+            <li><span class="icon">✓</span> Real-Time Proctor Communication & Warnings</li>
+          </ul>
+        </div>
+        <a href="student-login.html" class="btn btn-primary">
+          Enter Student Examination Room →
+        </a>
+      </div>
+
+      <!-- Admin Proctor Dashboard -->
+      <div class="glass-panel portal-card card-admin">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div class="portal-icon">👨‍🏫</div>
+            <span class="badge badge-warning" style="font-size: 0.72rem;">🔒 Secure Login Required</span>
+          </div>
+          <h2>Admin / Proctor Command Center</h2>
+          <p>
+            Centralized proctoring dashboard monitoring all examinees concurrently with live webcam snapshot streaming, 
+            instant violation alert ticker, photographic evidence logs, and remote control actions.
+          </p>
+          <ul class="portal-features">
+            <li><span class="icon">✓</span> Concurrent Student Multi-View Grid</li>
+            <li><span class="icon">✓</span> Instant Acoustic & Visual Violation Notifications</li>
+            <li><span class="icon">✓</span> Multi-College / School Exam Provisioning & Question Builder</li>
+            <li><span class="icon">✓</span> Remote Candidate Intervention (Warning, Terminate)</li>
+            <li><span class="icon">✓</span> Real-Time Background App Violation Intercepts</li>
+          </ul>
+        </div>
+        <a href="admin-login.html" class="btn btn-primary">
+          Authenticate & Open Command Center →
+        </a>
+      </div>
+
+      <!-- Audit Reports -->
+      <div class="glass-panel portal-card card-report">
+        <div>
+          <div class="portal-icon">📊</div>
+          <h2>Integrity Audit & Reports</h2>
+          <p>
+            Deep forensic examination analysis. Generates certified integrity scorecards with exact 
+            violation timelines, webcam evidence frames, and exportable printable evaluation records.
+          </p>
+          <ul class="portal-features">
+            <li><span class="icon">✓</span> Candidate Trust Score Metrics (0% - 100%)</li>
+            <li><span class="icon">✓</span> Photographic Infraction Timeline Archive</li>
+            <li><span class="icon">✓</span> University Evaluation & Sign-off Ready</li>
+            <li><span class="icon">✓</span> Exportable PDF / Print-Friendly Format</li>
+          </ul>
+        </div>
+        <a href="report.html" class="btn btn-outline">
+          View Integrity Reports →
+        </a>
+      </div>
+    </section>
+
+    <!-- Key Pillars Section -->
+    <section class="features-section">
+      <div class="section-header">
+        <span class="badge badge-info">Multi-Layered Defense Architecture</span>
+        <h2>How SmartProctor AI Protects Exam Integrity</h2>
+      </div>
+      <div class="feature-pillars">
+        <!-- Pillar 1 -->
+        <div class="glass-panel pillar-card">
+          <div style="font-size: 32px;">👤</div>
+          <h3>1. Head Pose & Face Tracking</h3>
+          <p>
+            Monitors 2D/3D facial landmarks and boundary centroid displacement. Triggers instant violation alerts when 
+            a candidate looks away left/right, casts gaze downwards suspiciously, leaves their seat (missing face), 
+            or brings a secondary collaborator into the frame.
+          </p>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="glass-panel pillar-card">
+          <div style="font-size: 32px;">📱</div>
+          <h3>2. Unauthorized Object Detection</h3>
+          <p>
+            Embedded real-time Computer Vision (COCO-SSD / MobileNet) detects contraband objects in camera view, including 
+            cell phones, smart tablets, headphones, and reference books. Automatically timestamps and snapshots evidence frames.
+          </p>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="glass-panel pillar-card">
+          <div style="font-size: 32px;">🖥️</div>
+          <h3>3. Background App & OS Audit</h3>
+          <p>
+            Combines browser sandbox lockdown (Page Visibility API, window blur, fullscreen enforcement, clipboard blocking) 
+            with a lightweight companion process agent that monitors native OS tasks for Discord, Telegram, WhatsApp, AnyDesk, and screen capture tools.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Companion Script Banner -->
+    <section class="glass-panel companion-banner">
+      <div class="companion-info">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+          <span class="badge badge-warning">Companion OS Daemon</span>
+          <span style="font-size: 0.8rem; color: var(--text-muted);">Windows Native Process Auditor</span>
+        </div>
+        <h3>Continuous Background Application Scanner</h3>
+        <p>
+          To run the live operating system process monitor alongside the student browser session, execute the companion agent:
+        </p>
+        <pre class="code-view" style="margin-top: 10px; display: inline-block;">powershell -ExecutionPolicy Bypass -File .\process-monitor.ps1   # or node process-monitor.js</pre>
+      </div>
+      <div>
+        <a href="admin-login.html" class="btn btn-outline btn-sm">Inspect Proctor Alerts</a>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

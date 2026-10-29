@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartProctor AI - Student Examination Portal</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/student.css">
+  <script src="js/theme.js"></script>
+  <script>
+    // Student Authentication Guard: Requires verified roll number starting with 2422k
+    (function () {
+      const studentRoll = localStorage.getItem('smartproctor_student_roll');
+      if (!studentRoll || !studentRoll.toLowerCase().startsWith('2422k')) {
+        window.location.replace('student-login.html');
+      }
+    })();
+  </script>
+  <!-- TensorFlow.js and COCO-SSD for Client-Side Computer Vision -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Navbar -->
+    <header class="navbar">
+      <a href="index.html" class="brand">
+        <div class="brand-icon">🛡️</div>
+        <div class="brand-text">
+          <h1>SmartProctor AI</h1>
+          <span>Candidate Examination Workstation</span>
+        </div>
+      </a>
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <!-- Verified Student Roll Badge -->
+        <span class="badge badge-info" id="student-roll-badge" style="font-family: var(--font-mono); font-size: 0.8rem; padding: 6px 12px;">
+          👨‍🎓 <span id="display-auth-roll">2422K...</span>
+        </span>
+        <button class="theme-toggle-btn" id="student-nav-theme-toggle" title="Toggle Dark and Light Mode">
+          <span class="theme-icon">🌙</span> <span class="theme-label">Dark Mode</span>
+        </button>
+        <span class="badge badge-info">
+          <span class="pulse-dot"></span>
+          PROCTOR READY
+        </span>
+        <a href="student-login.html" class="nav-link" style="font-size: 0.85rem;" title="Switch to another Student Roll Number">Switch Student</a>
+        <a href="index.html" class="nav-link">Exit to Hub</a>
+      </div>
+    </header>
+
+    <!-- SCREEN 1: PRE-EXAM SYSTEM VERIFICATION -->
+    <section id="screen-setup" class="glass-panel exam-setup-container">
+      <div class="setup-header">
+        <span class="badge badge-info" style="margin-bottom: 12px;">Pre-Examination Diagnostics</span>
+        <h2>System & Hardware Integrity Check</h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+          Please grant camera and microphone permissions and confirm your student identity before entering 
+          the continuous AI-proctored examination room.
+        </p>
+      </div>
+
+      <!-- Camera Preview Box -->
+      <div class="webcam-preview-box">
+        <video id="setup-video-preview" autoplay playsinline muted></video>
+        <div style="position: absolute; bottom: 10px; font-size: 0.75rem; color: #fff; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px;">
+          Live Sensor Verification
+        </div>
+      </div>
+
+      <!-- Diagnostics Checklist Grid -->
+      <div class="system-check-grid">
+        <div class="check-item">
+          <div class="check-item-info">
+            <div class="check-icon">📷</div>
+            <div>
+              <div style="font-weight: 600;">Webcam Sensor</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Required for face & object tracking</div>
+            </div>
+          </div>
+          <div id="status-cam"><span class="badge badge-info">Verifying...</span></div>
+        </div>
+
+        <div class="check-item">
+          <div class="check-item-info">
+            <div class="check-icon">🎙️</div>
+            <div>
+              <div style="font-weight: 600;">Microphone Sensor</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Acoustic speech monitor (5-10s voice = warning; 2-3 mins voice = auto expulsion)</div>
+            </div>
+          </div>
+          <div id="status-mic"><span class="badge badge-info">Verifying...</span></div>
+        </div>
+
+        <div class="check-item">
+          <div class="check-item-info">
+            <div class="check-icon">🖥️</div>
+            <div>
+              <div style="font-weight: 600;">Full-Screen Lock</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Enforced during examination session</div>
+            </div>
+          </div>
+          <div id="status-fs"><span class="badge badge-success">✓ Enforced</span></div>
+        </div>
+
+        <div class="check-item">
+          <div class="check-item-info">
+            <div class="check-icon">🛡️</div>
+            <div>
+              <div style="font-weight: 600;">Background Process Auditor</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">OS process & communication monitor</div>
+            </div>
+          </div>
+          <div id="status-daemon"><span class="badge badge-success">✓ Connected</span></div>
+        </div>
+      </div>
+
+      <!-- Dark and Light Mode Selection Option -->
+      <div class="theme-preference-card">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 26px;">🌓</div>
+          <div>
+            <div style="font-weight: 700; font-size: 1rem; color: var(--text-primary);">Examination Interface Theme Mode</div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary);">Select Dark Mode or Light Mode for optimal visual contrast and comfort</div>
+          </div>
+        </div>
+        <div class="theme-segmented-control" role="group" aria-label="Dark and Light Mode Option">
+          <button type="button" class="theme-choice-btn active" data-theme-choice="dark" title="Switch to Dark Mode">
+            <span>🌙</span> Dark Mode
+          </button>
+          <button type="button" class="theme-choice-btn" data-theme-choice="light" title="Switch to Light Mode">
+            <span>☀️</span> Light Mode
+          </button>
+        </div>
+      </div>
+
+      <!-- Mandatory Microphone On Option Card -->
+      <div class="mandatory-mic-preference-card" id="mandatory-mic-card">
+        <div class="mic-card-left">
+          <div class="mic-icon-wrapper" id="mic-icon-wrapper">
+            <span id="mic-icon-symbol">🎙️</span>
+          </div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <span style="font-weight: 700; font-size: 1.02rem; color: var(--text-primary);">Microphone Sensor Authorization</span>
+              <span class="badge badge-danger" style="font-size: 0.7rem; font-weight: 800; letter-spacing: 0.5px;">MANDATORY TO ENTER</span>
+            </div>
+            <div style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 3px;">
+              Microphone MUST be turned ON to enter the examination. Solitary speech & noise monitor active.
+            </div>
+            <!-- Live Audio Input Bar on Setup Screen -->
+            <div class="setup-mic-meter-container" style="margin-top: 8px; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-family: var(--font-mono); font-weight: 600;">LIVE MIC INPUT:</span>
+              <div class="audio-level-meter-bg" style="width: 140px; height: 8px; margin: 0;">
+                <div id="setup-audio-level-fill" class="audio-level-meter-fill" style="width: 0%;"></div>
+              </div>
+              <span id="setup-mic-db-text" style="font-size: 0.72rem; color: #10b981; font-family: var(--font-mono); font-weight: 700;">Active & Ready</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mic-card-right">
+          <div class="mic-mandatory-switch-row" title="Microphone is mandatory to enter the exam">
+            <span id="mic-switch-label" style="font-size: 0.85rem; font-weight: 700; color: #10b981;">
+              ● Microphone: ON
+            </span>
+            <label class="toggle-switch" for="checkbox-mic-toggle" title="Microphone is mandatory">
+              <input type="checkbox" id="checkbox-mic-toggle" checked>
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+          <button type="button" id="btn-retest-mic" class="btn btn-outline btn-sm" style="font-size: 0.76rem; padding: 6px 14px;">
+            🔄 Retest Mic
+          </button>
+        </div>
+      </div>
+
+      <!-- School / College & Examination Selection -->
+      <div style="margin: 24px 0; background: var(--bg-card); padding: 22px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+          <h3 style="font-size: 1.15rem; display: flex; align-items: center; gap: 8px; color: var(--text-primary);">
+            <span>🏫</span> Select Examination & Academic Institution
+          </h3>
+          <span id="setup-exam-badge" class="badge badge-info" style="font-size: 0.72rem;">Apex Institute • CS-402</span>
+        </div>
+        
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Available Proctored Examinations:</label>
+          <select id="select-exam-choice" style="width: 100%; padding: 12px 14px; border-radius: var(--radius-sm); font-size: 0.95rem; cursor: pointer;">
+            <!-- Populated dynamically from /api/exams -->
+          </select>
+        </div>
+
+        <div id="setup-exam-summary" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; background: rgba(255,255,255,0.03); padding: 14px 16px; border-radius: var(--radius-sm); font-size: 0.82rem; border: 1px solid var(--border-subtle);">
+          <div>
+            <span style="color: var(--text-muted); display: block; font-weight: 600;">Institution:</span>
+            <strong id="setup-inst-name" style="color: var(--text-primary);">Apex Institute of Technology</strong>
+          </div>
+          <div>
+            <span style="color: var(--text-muted); display: block; font-weight: 600;">Department / Grade:</span>
+            <strong id="setup-dept-name" style="color: var(--text-primary);">Computer Science & Engineering</strong>
+          </div>
+          <div>
+            <span style="color: var(--text-muted); display: block; font-weight: 600;">Duration & Evaluation:</span>
+            <strong id="setup-dur-marks" style="color: var(--text-primary);">45 Mins • 50 Marks</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Candidate Credentials Form -->
+      <div style="margin: 24px 0; background: var(--bg-card); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+        <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: var(--text-primary);">Candidate Credentials</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 18px;">
+          <div>
+            <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Full Name</label>
+            <input type="text" id="input-candidate-name" value="Naveen Kumar" style="width: 100%; padding: 12px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">Roll / Student Registration No. (Starts with 2422K)</label>
+            <input type="text" id="input-candidate-roll" value="2422K042" style="width: 100%; padding: 12px; font-family: var(--font-mono); font-weight: 700; letter-spacing: 1px;">
+          </div>
+        </div>
+      </div>
+
+      <!-- Start Exam Button -->
+      <div style="text-align: center; margin-top: 24px;">
+        <div style="margin-bottom: 12px; font-size: 0.85rem; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <span style="color: #10b981;">✓</span> <strong>Instant Autonomous Entry:</strong> No admin manual check or approval required. Actions start automatically.
+        </div>
+        <button id="btn-start-exam" class="btn btn-primary" style="padding: 15px 42px; font-size: 1.1rem; font-weight: 700; box-shadow: 0 4px 20px rgba(255,255,255,0.2);">
+          🚀 Start Autonomous AI-Proctored Exam Room →
+        </button>
+        <div style="font-size: 0.76rem; color: var(--text-muted); margin-top: 10px;">
+          Continuous computer vision, tab lockdown, and disciplinary strike actions begin the moment the exam starts.
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: ACTIVE PROCTORED EXAM WORKSTATION -->
+    <section id="screen-exam" style="display: none;">
+      <!-- Header Bar -->
+      <div class="exam-header-bar" style="margin-bottom: 20px;">
+        <div>
+          <div id="display-exam-header" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">CS-402 Final Examination</div>
+          <h2 style="font-size: 1.25rem;">Candidate: <span id="display-candidate-name" style="color: var(--text-primary);">Candidate</span> (<span id="display-candidate-roll">ROLL</span>)</h2>
+          <div style="margin-top: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <span class="autonomous-indicator-pill">
+              <span class="pulse-dot"></span> 🤖 Autonomous AI Actions Active (No Admin Check Needed)
+            </span>
+            <span class="badge badge-info" style="font-size: 0.72rem;">
+              Enforcement: Instant Computer Vision & Security Lockdown
+            </span>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <button class="theme-toggle-btn" title="Toggle Dark and Light Mode">
+            <span class="theme-icon">🌙</span> <span class="theme-label">Dark Mode</span>
+          </button>
+          <div id="timer-container" class="timer-box">
+            <span>⏱️</span>
+            <span id="exam-countdown">45:00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Layout -->
+      <div class="exam-layout">
+        <!-- Center: Question Container -->
+        <main class="exam-main">
+          <div class="glass-panel question-panel">
+            <div>
+              <div class="question-meta">
+                <span id="current-question-num" class="question-number">Question 1 of 8</span>
+                <span id="current-question-marks" class="badge badge-info">[5 Marks]</span>
+              </div>
+
+              <!-- Question Text -->
+              <h3 id="question-body-text" class="question-text">
+                Loading question data...
+              </h3>
+
+              <!-- Optional Code Snippet Block -->
+              <pre id="question-code-block" class="code-view" style="display: none; margin-bottom: 24px;"></pre>
+
+              <!-- MCQ Options Container -->
+              <div id="question-options-container" class="options-list"></div>
+
+              <!-- Subjective Answer Container -->
+              <div id="question-subjective-container" style="display: none; margin-bottom: 24px;">
+                <textarea id="subjective-answer-input" rows="8" placeholder="Type your detailed technical explanation here..." style="width: 100%; padding: 16px; font-size: 1rem; resize: vertical;"></textarea>
+              </div>
+            </div>
+
+            <!-- Question Action Controls -->
+            <div class="question-actions">
+              <button id="btn-prev-question" class="btn btn-outline btn-sm">← Previous</button>
+              <button id="btn-flag-question" class="btn btn-outline btn-sm">🏳️ Flag for Review</button>
+              <div>
+                <button id="btn-next-question" class="btn btn-primary btn-sm">Next Question →</button>
+                <button id="btn-submit-exam" class="btn btn-danger btn-sm" style="display: none;">Submit Final Exam 🏁</button>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        <!-- Right: AI Proctor HUD Sidebar -->
+        <aside class="proctor-hud">
+          <!-- Live Camera Viewport -->
+          <div class="glass-panel hud-camera-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); letter-spacing: 0.5px;">AI SENSOR FEED</span>
+              <span class="badge badge-success" style="font-size: 0.7rem;">
+                <span class="pulse-dot"></span> LIVE PROCTOR
+              </span>
+            </div>
+
+            <div class="camera-viewport">
+              <video id="proctor-live-video" autoplay playsinline muted></video>
+              <canvas id="proctor-hud-canvas"></canvas>
+              <div class="camera-status-overlay">
+                <span class="pulse-dot" style="background-color: #10b981;"></span>
+                <span>Active 30 FPS</span>
+              </div>
+            </div>
+
+            <!-- Real-time HUD Biometric Metrics -->
+            <div class="hud-detection-metrics">
+              <div class="metric-row">
+                <span style="color: var(--text-muted);">Head Pose / Gaze:</span>
+                <span id="hud-head-pose" class="metric-val">
+                  <span class="badge badge-success">✓ Looking Forward</span>
+                </span>
+              </div>
+
+              <div class="metric-row">
+                <span style="color: var(--text-muted);">Face Presence:</span>
+                <span id="hud-face-status" class="metric-val">
+                  <span class="badge badge-success">1 Verified</span>
+                </span>
+              </div>
+
+              <div class="metric-row">
+                <span style="color: var(--text-muted);">Unauthorized Objects:</span>
+                <span id="hud-object-status" class="metric-val">
+                  <span class="badge badge-success">Clean Area</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Integrity Trust Score Meter -->
+          <div class="glass-panel trust-meter">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">INTEGRITY TRUST SCORE</span>
+              <span id="trust-value" style="font-family: var(--font-mono); font-weight: 700; color: var(--cyan-glow);">100%</span>
+            </div>
+            <div class="trust-bar-bg">
+              <div id="trust-fill" class="trust-bar-fill" style="width: 100%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-muted);">
+              <span>Disqualification Threshold: &le;50%</span>
+              <span id="violations-count-badge" class="badge badge-info" style="font-size: 0.7rem;">0 Alerts</span>
+            </div>
+          </div>
+
+          <!-- Autonomous AI Disciplinary Status HUD Card -->
+          <div class="glass-panel" style="padding: 16px; margin-bottom: 18px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                <span>👤</span> FACE ROTATION WARNINGS
+              </span>
+              <span id="hud-strikes-count" class="badge badge-success" style="font-size: 0.7rem; font-family: var(--font-mono);">
+                0 / 3 Face Warnings
+              </span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-bottom: 10px;">
+              <div id="hud-strike-dot-1" class="hud-strike-dot">1: Safe</div>
+              <div id="hud-strike-dot-2" class="hud-strike-dot">2: Safe</div>
+              <div id="hud-strike-dot-3" class="hud-strike-dot">3: Safe</div>
+              <div id="hud-strike-dot-4" class="hud-strike-dot">4: Expel</div>
+            </div>
+
+            <!-- Zero-Tolerance Strict Enforcers -->
+            <div style="border-top: 1px solid var(--border-subtle); padding-top: 8px; margin-top: 4px; display: flex; flex-direction: column; gap: 6px; font-size: 0.75rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--text-secondary);">📱 Phone on Camera:</span>
+                <span class="badge badge-danger" style="font-size: 0.65rem; padding: 2px 6px;">Instant Expulsion</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: var(--text-secondary);">🌐 3rd-Party Site / Tab:</span>
+                <span class="badge badge-danger" style="font-size: 0.65rem; padding: 2px 6px;">Instant Expulsion</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Question Navigator Palette -->
+          <div class="glass-panel palette-card">
+            <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary);">QUESTION PALETTE</span>
+            <div id="question-palette" class="palette-grid"></div>
+            <div style="margin-top: 14px; display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted);">
+              <span style="display: flex; align-items: center; gap: 4px;">
+                <span style="width: 8px; height: 8px; border-radius: 2px; background: #34d399;"></span> Answered
+              </span>
+              <span style="display: flex; align-items: center; gap: 4px;">
+                <span style="width: 8px; height: 8px; border-radius: 2px; background: #fbbf24;"></span> Flagged
+              </span>
+            </div>
+          </div>
+
+          <!-- Live Microphone Acoustic Sensor & Speech Monitor Card (Locked ON) -->
+          <div class="glass-panel hud-mic-card" id="hud-mic-card" title="Microphone is locked ON - Turning off is prohibited">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span style="font-size: 0.82rem; font-weight: 700; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;">
+                <span>🎙️</span> MIC SPEECH MONITOR
+              </span>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span class="badge badge-info" style="font-size: 0.65rem; padding: 2px 6px;">🔒 Locked ON</span>
+                <span id="hud-mic-status" class="badge badge-success" style="font-size: 0.7rem;">
+                  ✓ Silent / Clear
+                </span>
+              </div>
+            </div>
+            <div class="audio-level-meter-bg">
+              <div id="hud-audio-level-fill" class="audio-level-meter-fill"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">
+              <span id="hud-speech-timer-text">Speaking: 0s / 120s</span>
+              <span style="color: #fbbf24; font-weight: 600;">(Warn 5s &bull; Expel 120s)</span>
+            </div>
+            <div style="font-size: 0.68rem; color: var(--text-muted); line-height: 1.3;">
+              Turning off laptop microphone is strictly prohibited. Continuous solitary speech monitor active.
+            </div>
+          </div>
+
+          <!-- Presentation & Viva Demo Simulator Panel -->
+          <div class="demo-simulation-card">
+            <div style="font-size: 0.78rem; font-weight: 700; color: var(--cyan-glow); margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+              <span>🧪</span> VIVA DEMO SIMULATION CONTROLS
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;">
+              Test automated rules instantly during examiner presentation:
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              <button id="btn-sim-head" class="btn btn-outline btn-sm" style="font-size: 0.78rem; padding: 6px 10px; text-align: left;">
+                👤 Test Face Rotation (Warn 1 &rarr; 2 &rarr; 3 &rarr; Expel 4th)
+              </button>
+              <button id="btn-sim-speech-warn" class="btn btn-outline btn-sm" style="font-size: 0.78rem; padding: 6px 10px; text-align: left; color: #fbbf24; border-color: rgba(245, 158, 11, 0.4);">
+                🎙️ Test Speech Warning (5-10s Speaking)
+              </button>
+              <button id="btn-sim-speech-expel" class="btn btn-danger btn-sm" style="font-size: 0.78rem; padding: 6px 10px; text-align: left; font-weight: 700;">
+                🛑 Test Speech Expulsion (2-3 mins Speaking)
+              </button>
+              <button id="btn-sim-mic-mute" class="btn btn-danger btn-sm" style="font-size: 0.78rem; padding: 6px 10px; text-align: left; font-weight: 700; background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171;">
+                🔇 Test Laptop Mic Turn Off / Mute (Prohibited Alert Modal)
+              </button>
+              <button id="btn-sim-phone" class="btn btn-danger btn-sm" style="font-size: 0.78rem; padding: 6px 10px; text-align: left; font-weight: 700;">
+                📱 Test Mobile Phone (Instant Auto-Disqualification)
+              </button>
+              <button id="btn-sim-app" class="btn btn-danger btn-sm" style="font-size: 0.78rem; padding: 6px 10px; text-align: left; font-weight: 700;">
+                🌐 Test 3rd-Party Site / Tab Switch (Instant Auto-Disqualification)
+              </button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: EXAM SUBMISSION SUMMARY -->
+    <section id="screen-result" class="glass-panel" style="display: none; max-width: 680px; margin: 40px auto; padding: 40px; text-align: center;">
+      <div style="font-size: 60px; margin-bottom: 16px;">🏁</div>
+      <h2 style="font-size: 2rem; margin-bottom: 8px;">Examination Successfully Submitted</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 30px;">
+        Your answers and proctoring telemetry logs have been securely recorded into the examination ledger.
+      </p>
+
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 24px; margin-bottom: 30px; text-align: left;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Candidate Name</div>
+            <div id="result-candidate-name" style="font-weight: 600; font-size: 1.05rem;">Candidate</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Roll Number</div>
+            <div id="result-candidate-roll" style="font-weight: 600; font-size: 1.05rem;">CS2026-N/A</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Provisional Score</div>
+            <div id="result-score" style="font-weight: 700; font-size: 1.25rem; color: var(--cyan-glow);">-- / 50</div>
+          </div>
+          <div>
+            <div style="font-size: 0.8rem; color: var(--text-muted);">Integrity Trust Score</div>
+            <div id="result-trust" style="font-weight: 700; font-size: 1.25rem; color: #34d399;">100%</div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">Integrity Status</div>
+          <span id="result-integrity-badge" class="badge badge-success">Clean Record</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 16px;">
+        <a href="report.html" class="btn btn-primary">View Certified Proctor Report →</a>
+        <a href="index.html" class="btn btn-outline">Return to Portal Hub</a>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: AUTOMATIC EXAM TERMINATION / DISQUALIFICATION -->
+    <section id="screen-terminated" class="glass-panel" style="display: none; max-width: 680px; margin: 40px auto; padding: 40px; text-align: center; border: 1px solid rgba(239, 68, 68, 0.6); box-shadow: 0 0 40px rgba(239, 68, 68, 0.25);">
+      <div style="font-size: 64px; margin-bottom: 16px;">🛑</div>
+      <div class="badge badge-danger" style="margin-bottom: 12px; font-size: 0.82rem; letter-spacing: 1px;">
+        SECURITY ENFORCEMENT PROTOCOL TRIGGERED
+      </div>
+      <h2 style="font-size: 2rem; margin-bottom: 8px; color: #f87171;">Examination Automatically Terminated</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 0.95rem;">
+        Your examination session has been halted and automatically disqualified because your 
+        <strong>Integrity Trust Level dropped to 50% or below</strong> due to detected proctor infractions.
+      </p>
+
+      <div style="background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: var(--radius-md); padding: 24px; margin-bottom: 28px; text-align: left;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Candidate Name</div>
+            <div id="term-candidate-name" style="font-weight: 700; color: #fff;">Candidate</div>
+          </div>
+          <div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Roll / Registration No.</div>
+            <div id="term-candidate-roll" style="font-weight: 700; color: #fff;">ROLL-000</div>
+          </div>
+          <div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Final Trust Score</div>
+            <div id="term-trust-score" style="font-size: 1.4rem; font-weight: 800; color: #f87171;">45%</div>
+            <div style="font-size: 0.72rem; color: #fca5a5;">(Breached &le; 50% Threshold)</div>
+          </div>
+          <div>
+            <div style="font-size: 0.78rem; color: var(--text-muted);">Infractions Logged</div>
+            <div id="term-violations-count" style="font-size: 1.4rem; font-weight: 800; color: #fbbf24;">4</div>
+          </div>
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+          <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 4px;">Disqualification Reason</div>
+          <div id="term-reason-text" style="font-size: 0.88rem; color: #fca5a5; line-height: 1.4;">
+            Automatic Disqualification: Integrity Trust Score dropped to 50% or below.
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+        <a id="term-report-btn" href="report.html" class="btn btn-danger">
+          📑 View Certified Forensic Violation Report →
+        </a>
+        <a href="index.html" class="btn btn-outline">
+          Return to Portal Hub
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <!-- AUTONOMOUS AI PROCTOR WARNING MODAL (Face Rotation Warnings) -->
+  <div id="modal-proctor-warning" class="modal-overlay" style="z-index: 99999;">
+    <div class="modal-content proctor-action-modal" style="border-color: var(--color-danger); box-shadow: var(--shadow-danger); max-width: 620px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 34px;">🤖</div>
+          <div>
+            <div class="badge badge-danger" style="margin-bottom: 4px; font-size: 0.72rem; letter-spacing: 0.8px;">
+              ⚡ FULLY AUTOMATED PROCTORING SYSTEM
+            </div>
+            <h3 id="proctor-warning-title" style="font-size: 1.35rem; color: #f87171; margin: 0;">
+              ⚠️ 1st Warning: Face Rotation Detected
+            </h3>
+          </div>
+        </div>
+        <span class="badge badge-info" style="font-size: 0.72rem; white-space: nowrap;">
+          Zero Admin Wait
+        </span>
+      </div>
+
+      <!-- Face Rotation Warnings Visual Tracker -->
+      <div class="ai-strikes-tracker">
+        <div style="display: flex; justify-content: space-between; font-size: 0.78rem; margin-bottom: 8px; color: var(--text-secondary);">
+          <span>Face Rotation Warnings</span>
+          <strong id="ai-strike-label" style="color: #f87171;">Warning 1 of 3 (4th = Auto Expulsion)</strong>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
+          <div id="strike-pill-1" class="strike-pill active">
+            <span>🔴 1st Warning</span>
+          </div>
+          <div id="strike-pill-2" class="strike-pill">
+            <span>⚠️ 2nd Warning</span>
+          </div>
+          <div id="strike-pill-3" class="strike-pill">
+            <span>🛑 3rd Warning</span>
+          </div>
+          <div id="strike-pill-4" class="strike-pill" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;">
+            <span>🚪 4th: Expel</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Warning Text & Infraction Details -->
+      <div style="margin-bottom: 18px;">
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600;">
+          AUTOMATED INFRACTION AUDIT:
+        </div>
+        <p id="proctor-warning-text" style="font-size: 0.98rem; line-height: 1.55; margin: 0; color: #f8fafc; background: rgba(239, 68, 68, 0.1); padding: 16px; border-radius: var(--radius-sm); border: 1px solid rgba(239, 68, 68, 0.35);">
+          Please keep your face directly oriented towards the center of your screen. Continued face rotation will lead to automatic expulsion.
+        </p>
+      </div>
+
+      <!-- Automated Rules Summary Notice -->
+      <div style="background: rgba(255, 255, 255, 0.04); border-left: 3px solid #f87171; padding: 10px 14px; border-radius: 4px; font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 22px; line-height: 1.5;">
+        <strong>Automated Exam Rules:</strong><br>
+        • 👤 <strong>Face Rotation:</strong> 3 warnings allowed. 4th occurrence automatically expels candidate.<br>
+        • 📱 <strong>Phone on Camera:</strong> Zero warnings &mdash; immediate automatic termination.<br>
+        • 🌐 <strong>3rd-Party Website / Tab Switch:</strong> Zero warnings &mdash; immediate automatic termination.
+      </div>
+
+      <!-- Acknowledge Button -->
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 0.78rem; color: var(--text-muted);" id="modal-strike-penalty-info">
+          Warning 1 of 3 Issued Automatically • 4th Rotation = Auto Disqualification
+        </span>
+        <button id="btn-close-proctor-warning" class="btn btn-danger" style="font-weight: 700; padding: 10px 24px;">
+          I Acknowledge Warning & Resume Exam &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANDATORY MICROPHONE REQUIREMENT POP-UP MODAL -->
+  <div id="modal-mic-mandatory" class="modal-overlay" style="display: none; z-index: 999999;">
+    <div class="modal-content proctor-action-modal" style="border-color: #ef4444; box-shadow: 0 20px 60px rgba(239, 68, 68, 0.45); max-width: 600px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 38px; line-height: 1;">🎙️</div>
+          <div>
+            <div class="badge badge-danger" style="margin-bottom: 4px; font-size: 0.72rem; letter-spacing: 0.8px;">
+              🛑 MANDATORY SYSTEM REQUIREMENT
+            </div>
+            <h3 id="mic-modal-title" style="font-size: 1.3rem; color: #ef4444; margin: 0;">
+              Microphone Must Be Turned ON
+            </h3>
+          </div>
+        </div>
+        <span class="badge badge-warning" style="font-size: 0.72rem; white-space: nowrap;">Required to Enter</span>
+      </div>
+
+      <div style="margin-bottom: 18px;">
+        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; font-weight: 700;">
+          MICROPHONE MANDATORY NOTICE:
+        </div>
+        <div id="mic-modal-body" style="font-size: 0.96rem; line-height: 1.6; color: var(--text-primary); background: rgba(239, 68, 68, 0.1); padding: 18px; border-radius: var(--radius-sm); border: 1px solid rgba(239, 68, 68, 0.35);">
+          <div style="font-size: 1.05rem; font-weight: 800; color: #f87171; margin-bottom: 8px;">
+            ⚠️ It is MUST to keep the Microphone ON to enter the exam!
+          </div>
+          <div>
+            The AI proctoring system enforces strict solitary speech monitoring:
+          </div>
+          <ul style="margin: 8px 0 8px 20px; padding: 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6;">
+            <li>Speaking aloud for <strong>5 to 10 seconds</strong> triggers an immediate audio disciplinary warning.</li>
+            <li>Speaking continuously for <strong>2 to 3 minutes</strong> will automatically terminate and end your exam.</li>
+          </ul>
+          <div style="font-weight: 700; color: #fca5a5; margin-top: 8px;">
+            You cannot turn OFF the microphone. The microphone must remain active and turned ON at all times.
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 12px;">
+        <button type="button" id="btn-force-mic-on" class="btn btn-primary" style="font-weight: 700; padding: 12px 28px; background: #ef4444; border-color: #ef4444; color: #fff; cursor: pointer;">
+          🎙️ Keep Microphone ON & Proceed &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CRITICAL LAPTOP MICROPHONE MUTED / TURNED OFF WARNING MODAL (DURING EXAM) -->
+  <div id="modal-mic-tamper-warning" class="modal-overlay" style="display: none; z-index: 9999999; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); background: rgba(15, 23, 42, 0.92);">
+    <div class="modal-content proctor-action-modal" style="border-color: #ef4444; border-width: 3px; box-shadow: 0 25px 80px rgba(239, 68, 68, 0.6); max-width: 640px;">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 42px; line-height: 1; animation: pulseRed 1s infinite alternate;">🛑</div>
+          <div>
+            <div class="badge badge-danger" style="margin-bottom: 4px; font-size: 0.74rem; letter-spacing: 0.8px; font-weight: 800;">
+              🚨 PROHIBITED ACTION &bull; EXAM LOCKDOWN
+            </div>
+            <h3 id="mic-tamper-title" style="font-size: 1.35rem; color: #ef4444; margin: 0; font-weight: 800;">
+              LAPTOP MICROPHONE MUTED / TURNED OFF!
+            </h3>
+          </div>
+        </div>
+        <span class="badge badge-danger" style="font-size: 0.72rem; font-weight: 700; white-space: nowrap;">
+          Action Blocked
+        </span>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <div id="mic-tamper-body" style="font-size: 0.96rem; line-height: 1.6; color: var(--text-primary); background: rgba(239, 68, 68, 0.12); padding: 20px; border-radius: var(--radius-sm); border: 2px solid rgba(239, 68, 68, 0.5);">
+          <div style="font-size: 1.12rem; font-weight: 900; color: #ef4444; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+            <span>🔇</span> DO NOT TURN OFF OR MUTE YOUR MICROPHONE!
+          </div>
+          <div style="color: #fca5a5; font-size: 0.95rem; margin-bottom: 12px; line-height: 1.55;">
+            You are NOT allowed to turn off, mute, or disable your microphone on your laptop while attending the examination. Continuous acoustic monitoring is strictly required.
+          </div>
+          <div style="background: rgba(0,0,0,0.35); border-radius: 4px; padding: 12px; margin-bottom: 12px; border: 1px solid rgba(239, 68, 68, 0.35); font-size: 0.85rem; color: #e2e8f0;">
+            <strong style="color: #fff; display: block; margin-bottom: 4px;">Possible Causes Detected:</strong>
+            • Laptop keyboard microphone mute hotkey pressed (e.g. <code>F4</code> or <code>Fn+F4</code>)<br>
+            • Microphone device turned off or muted in Windows / system settings<br>
+            • Browser audio permission revoked or muted in address bar
+          </div>
+          <div style="font-weight: 700; color: #f87171; font-size: 0.9rem;">
+            ⚠️ Exam interaction is paused. Please unmute your laptop microphone immediately or click the re-enable button below to resume.
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 0.78rem; color: #fca5a5; font-weight: 600;">
+          Incident logged in certified forensic audit ledger
+        </span>
+        <button type="button" id="btn-recover-laptop-mic" class="btn btn-primary" style="font-weight: 800; padding: 14px 28px; font-size: 1rem; background: #ef4444; border-color: #ef4444; color: #fff; cursor: pointer; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5);">
+          🎙️ Unmute & Re-activate Microphone Now &rarr;
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/ai-proctor.js"></script>
+  <script src="js/student.js"></script>
+</body>
+</html>
